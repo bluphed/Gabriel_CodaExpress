@@ -10,6 +10,11 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Coda Express">
   
+  <!-- ========== FAVICON para pestaña del navegador ========== -->
+  <link rel="icon" type="image/png" sizes="192x192" href="/Gabriel_CodaExpress/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/Gabriel_CodaExpress/android-chrome-512x512.png">
+  <link rel="apple-touch-icon" href="/Gabriel_CodaExpress/android-chrome-192x192.png">
+  
   <title>Coda Express</title>
   
   <style>
@@ -705,12 +710,25 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
 // Service Worker
 if ('serviceWorker' in navigator) {
   const swCode = `const CACHE_NAME = 'coda-v1';
-self.addEventListener('fetch', e => {
-  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+self.addEventListener('install', event => {
+  event.waitUntil(self.skipWaiting());
+});
+self.addEventListener('activate', event => {
+  event.waitUntil(self.clients.claim());
+});
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request))
+  );
 });`;
   const blob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(blob);
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register(URL.createObjectURL(blob));
+    navigator.serviceWorker.register(swUrl).then(reg => {
+      console.log('✅ Service Worker registrado');
+    }).catch(err => {
+      console.error('❌ Error SW:', err);
+    });
   });
 }
 
