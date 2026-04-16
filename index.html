@@ -64,16 +64,11 @@
       gap: 12px;
     }
     
-    .logo {
+    .logo-img {
       width: 50px;
       height: 50px;
-      background: linear-gradient(135deg, var(--coda), #ff6b35);
       border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      box-shadow: 0 4px 12px rgba(222, 68, 13, 0.3);
+      object-fit: contain;
     }
     
     h1 {
@@ -244,20 +239,17 @@
       color: #94a3b8;
     }
     
+    /* Pantalla de carga SPLASH - Fondo BLANCO */
     .splash {
       position: fixed;
       inset: 0;
-      background: white;
+      background: #FFFFFF;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 9999;
       transition: opacity 0.5s;
-    }
-    
-    .dark .splash {
-      background: #0f172a;
     }
     
     .splash.hide {
@@ -268,28 +260,45 @@
     .splash-logo {
       width: 100px;
       height: 100px;
-      background: linear-gradient(135deg, #DE440D, #ff6b35);
-      border-radius: 32px;
+      border-radius: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 56px;
       margin-bottom: 20px;
+    }
+    
+    .splash-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    
+    .splash h1 {
+      font-size: 2rem;
+      margin-top: 10px;
+    }
+    
+    .splash p {
+      color: #64748b;
+      margin-top: 8px;
     }
   </style>
 </head>
 <body>
 
+<!-- Pantalla de carga SPLASH - Fondo BLANCO con tu logo -->
 <div class="splash" id="splash">
-  <div class="splash-logo">🚀</div>
+  <div class="splash-logo">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23DE440D'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white'%3EC%3C/text%3E%3C/svg%3E" alt="Logo">
+  </div>
   <h1 style="color: #DE440D;">Coda Express</h1>
-  <p style="margin-top: 10px; color: #64748b;">Calcula el costo de tus entregas</p>
+  <p>Calcula el costo de tus entregas</p>
 </div>
 
 <div class="container" id="app">
   <div class="header">
     <div class="logo-area">
-      <div class="logo">🚀</div>
+      <img class="logo-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23DE440D'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white'%3EC%3C/text%3E%3C/svg%3E" alt="Coda Express">
       <h1>Coda Express</h1>
     </div>
     <div style="display: flex; gap: 10px;">
@@ -344,7 +353,7 @@
 <div id="toast" class="toast"></div>
 
 <script>
-// ========== CODA EXPRESS - CON TU API KEY ==========
+// ========== CODA EXPRESS ==========
 const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
 
 (function() {
@@ -366,7 +375,6 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
   let clientePoint = null;
   let isDarkMode = localStorage.getItem('darkMode') === 'true';
   
-  // La Cremita - Santo Domingo
   const RESTAURANTE = { lat: -0.245197, lng: -79.158230 };
   
   function showToast(message, type = 'info') {
@@ -401,7 +409,6 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
       fullscreenControl: true
     });
     
-    // Marcador del restaurante (rojo)
     new google.maps.Marker({
       position: RESTAURANTE,
       map: map,
@@ -409,7 +416,6 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
       icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
     });
     
-    // Marcador del cliente (verde, movible)
     marker = new google.maps.Marker({
       position: RESTAURANTE,
       map: map,
@@ -454,7 +460,6 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
     
     showToast('🔍 Buscando ubicación...', 'info');
     
-    // Extraer coordenadas de link de Google Maps
     const latMatch = query.match(/@([-\d.]+),([-\d.]+)/);
     if (latMatch) {
       const lat = parseFloat(latMatch[1]);
@@ -498,7 +503,6 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
       return;
     }
     
-    // Cálculo de distancia usando fórmula de Haversine
     const R = 6371;
     const dLat = (clientePoint.lat - RESTAURANTE.lat) * Math.PI / 180;
     const dLng = (clientePoint.lng - RESTAURANTE.lng) * Math.PI / 180;
@@ -508,7 +512,6 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     const distanciaKm = R * c;
     
-    // Cálculo de costo
     let costo;
     if (distanciaKm <= 1.5) {
       costo = 2.00;
@@ -566,7 +569,6 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
       }
     }, 100);
     
-    // Guardar en historial
     const historial = JSON.parse(localStorage.getItem('coda_historial') || '[]');
     historial.unshift({ ...resultadoData, fecha: new Date().toISOString() });
     if (historial.length > 20) historial.pop();
@@ -583,7 +585,6 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
       document.body.classList.remove('dark');
       darkModeBtn.textContent = '🌙';
     }
-    // Recargar mapa con nuevo estilo
     if (map && window.google) {
       const newStyles = isDarkMode ? [
         { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
@@ -605,7 +606,6 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
       '📲 Instala la app para usarla sin internet');
   }
   
-  // Cargar Google Maps
   function loadGoogleMaps() {
     const script = document.createElement('script');
     script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initMapCallback&libraries=geometry,places`;
@@ -617,7 +617,6 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
     document.head.appendChild(script);
   }
   
-  // Eventos
   searchBtn.onclick = buscarDireccion;
   calcularBtn.onclick = calcularDistanciaYCosto;
   darkModeBtn.onclick = toggleDarkMode;
@@ -627,13 +626,11 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
     if (e.key === 'Enter') buscarDireccion();
   });
   
-  // Aplicar dark mode guardado
   if (isDarkMode) {
     document.body.classList.add('dark');
     darkModeBtn.textContent = '☀️';
   }
   
-  // Ocultar splash
   setTimeout(() => {
     splash.classList.add('hide');
     setTimeout(() => {
@@ -641,7 +638,6 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
     }, 500);
   }, 1500);
   
-  // Cargar datos guardados
   const savedNombre = localStorage.getItem('coda_nombre');
   const savedTelefono = localStorage.getItem('coda_telefono');
   if (savedNombre) nombreInput.value = savedNombre;
@@ -650,10 +646,8 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
   nombreInput.addEventListener('change', () => localStorage.setItem('coda_nombre', nombreInput.value));
   telefonoInput.addEventListener('change', () => localStorage.setItem('coda_telefono', telefonoInput.value));
   
-  // Iniciar
   loadGoogleMaps();
   
-  // PWA Instalación
   let deferredPrompt;
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
@@ -673,7 +667,6 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
     }
   });
   
-  // iOS
   if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.navigator.standalone) {
     setTimeout(() => {
       showToast('📱 En iOS: Compartir → "Agregar a pantalla de inicio"', 'info');
@@ -681,7 +674,7 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
   }
 })();
 
-// Service Worker embebido para PWA
+// Service Worker
 if ('serviceWorker' in navigator) {
   const swCode = `const CACHE_NAME = 'coda-express-v1';
 const urlsToCache = ['/', '/index.html'];
@@ -716,15 +709,15 @@ self.addEventListener('fetch', event => {
   });
 }
 
-// Manifest dinámico para PWA
+// Manifest
 const manifestData = {
   short_name: "CodaExpress",
   name: "Coda Express - Entregas",
   description: "Calcula el costo de tus entregas",
   icons: [
-    { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23DE440D'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white'%3E🚀%3C/text%3E%3C/svg%3E", type: "image/svg+xml", sizes: "any" },
-    { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%23DE440D'/%3E%3Ctext x='96' y='128' font-size='96' text-anchor='middle' fill='white'%3E🚀%3C/text%3E%3C/svg%3E", type: "image/svg+xml", sizes: "192x192" },
-    { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23DE440D'/%3E%3Ctext x='256' y='340' font-size='256' text-anchor='middle' fill='white'%3E🚀%3C/text%3E%3C/svg%3E", type: "image/svg+xml", sizes: "512x512" }
+    { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23DE440D'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white'%3EC%3C/text%3E%3C/svg%3E", type: "image/svg+xml", sizes: "any" },
+    { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%23DE440D'/%3E%3Ctext x='96' y='128' font-size='96' text-anchor='middle' fill='white'%3EC%3C/text%3E%3C/svg%3E", type: "image/svg+xml", sizes: "192x192" },
+    { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23DE440D'/%3E%3Ctext x='256' y='340' font-size='256' text-anchor='middle' fill='white'%3EC%3C/text%3E%3C/svg%3E", type: "image/svg+xml", sizes: "512x512" }
   ],
   start_url: "/Gabriel_CodaExpress/",
   display: "standalone",
