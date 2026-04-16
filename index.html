@@ -161,20 +161,12 @@
     }
     
     .map-container {
-      height: 300px;
+      height: 350px;
       border-radius: 16px;
       overflow: hidden;
       margin-top: 15px;
       border: 1px solid var(--border);
       background: #f0f0f0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .map-placeholder {
-      text-align: center;
-      color: #666;
     }
     
     .result-card {
@@ -284,12 +276,6 @@
       font-size: 56px;
       margin-bottom: 20px;
     }
-    
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: var(--coda);
-    }
   </style>
 </head>
 <body>
@@ -317,9 +303,7 @@
       <h3 style="margin-bottom: 15px;">📍 Ubicación del cliente</h3>
       <input type="text" id="locationInput" placeholder="Pega un link de Google Maps o escribe una dirección">
       <button class="btn-primary" id="searchBtn" style="width: 100%;">Buscar ubicación</button>
-      <div id="map" class="map-container">
-        <div class="loading">🔄 Cargando mapa...</div>
-      </div>
+      <div id="map" class="map-container"></div>
       <p style="font-size: 12px; margin-top: 10px; color: #94a3b8;">
         💡 Haz clic en el mapa para marcar la ubicación manualmente
       </p>
@@ -360,11 +344,8 @@
 <div id="toast" class="toast"></div>
 
 <script>
-// ========== ⚠️ IMPORTANTE: REEMPLAZA ESTA API KEY CON LA TUYA ==========
-// Ve a: https://console.cloud.google.com/
-// Crea un proyecto y activa: Maps JavaScript API, Geocoding API, Places API
-const GOOGLE_MAPS_API_KEY = "TU_API_KEY_AQUI";  // 👈 CAMBIA ESTO
-// ====================================================================
+// ========== CODA EXPRESS - CON TU API KEY ==========
+const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
 
 (function() {
   const splash = document.getElementById('splash');
@@ -385,6 +366,7 @@ const GOOGLE_MAPS_API_KEY = "TU_API_KEY_AQUI";  // 👈 CAMBIA ESTO
   let clientePoint = null;
   let isDarkMode = localStorage.getItem('darkMode') === 'true';
   
+  // La Cremita - Santo Domingo
   const RESTAURANTE = { lat: -0.245197, lng: -79.158230 };
   
   function showToast(message, type = 'info') {
@@ -400,60 +382,59 @@ const GOOGLE_MAPS_API_KEY = "TU_API_KEY_AQUI";  // 👈 CAMBIA ESTO
   function initMap() {
     if (!window.google || !window.google.maps) {
       console.error('Google Maps no cargado');
-      document.getElementById('map').innerHTML = '<div class="loading">❌ Error cargando mapa. Verifica tu API Key</div>';
+      showToast('Error cargando Google Maps', 'error');
       return;
     }
     
-    try {
-      map = new google.maps.Map(document.getElementById('map'), {
-        center: RESTAURANTE,
-        zoom: 14,
-        styles: isDarkMode ? darkMapStyle : lightMapStyle
-      });
-      
-      new google.maps.Marker({
-        position: RESTAURANTE,
-        map: map,
-        title: 'La Cremita',
-        icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' }
-      });
-      
-      marker = new google.maps.Marker({
-        position: RESTAURANTE,
-        map: map,
-        title: 'Cliente',
-        icon: { url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' },
-        draggable: true
-      });
-      
-      marker.addListener('dragend', () => {
-        const pos = marker.getPosition();
-        clientePoint = { lat: pos.lat(), lng: pos.lng() };
-        reverseGeocode(clientePoint);
-      });
-      
-      map.addListener('click', (e) => {
-        const pos = e.latLng;
-        clientePoint = { lat: pos.lat(), lng: pos.lng() };
-        marker.setPosition(pos);
-        reverseGeocode(clientePoint);
-      });
-      
-      showToast('✅ Mapa cargado correctamente', 'success');
-    } catch (error) {
-      console.error('Error en mapa:', error);
-      document.getElementById('map').innerHTML = '<div class="loading">❌ Error al cargar el mapa</div>';
-    }
+    const mapStyles = isDarkMode ? [
+      { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+      { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+      { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+      { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] }
+    ] : [];
+    
+    map = new google.maps.Map(document.getElementById('map'), {
+      center: RESTAURANTE,
+      zoom: 14,
+      styles: mapStyles,
+      zoomControl: true,
+      fullscreenControl: true
+    });
+    
+    // Marcador del restaurante (rojo)
+    new google.maps.Marker({
+      position: RESTAURANTE,
+      map: map,
+      title: 'La Cremita',
+      icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+    });
+    
+    // Marcador del cliente (verde, movible)
+    marker = new google.maps.Marker({
+      position: RESTAURANTE,
+      map: map,
+      title: 'Cliente',
+      icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+      draggable: true
+    });
+    
+    marker.addListener('dragend', () => {
+      const pos = marker.getPosition();
+      clientePoint = { lat: pos.lat(), lng: pos.lng() };
+      reverseGeocode(clientePoint);
+      showToast('📍 Ubicación actualizada', 'success');
+    });
+    
+    map.addListener('click', (e) => {
+      const pos = e.latLng;
+      clientePoint = { lat: pos.lat(), lng: pos.lng() };
+      marker.setPosition(pos);
+      reverseGeocode(clientePoint);
+      showToast('📍 Ubicación marcada', 'success');
+    });
+    
+    showToast('✅ Mapa cargado correctamente', 'success');
   }
-  
-  const lightMapStyle = [];
-  const darkMapStyle = [
-    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-    { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
-    { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] },
-    { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] }
-  ];
   
   function reverseGeocode(point) {
     const geocoder = new google.maps.Geocoder();
@@ -473,6 +454,7 @@ const GOOGLE_MAPS_API_KEY = "TU_API_KEY_AQUI";  // 👈 CAMBIA ESTO
     
     showToast('🔍 Buscando ubicación...', 'info');
     
+    // Extraer coordenadas de link de Google Maps
     const latMatch = query.match(/@([-\d.]+),([-\d.]+)/);
     if (latMatch) {
       const lat = parseFloat(latMatch[1]);
@@ -511,6 +493,12 @@ const GOOGLE_MAPS_API_KEY = "TU_API_KEY_AQUI";  // 👈 CAMBIA ESTO
       return;
     }
     
+    if (!telefonoInput.value.trim()) {
+      showToast('⚠️ Ingresa el teléfono del cliente', 'error');
+      return;
+    }
+    
+    // Cálculo de distancia usando fórmula de Haversine
     const R = 6371;
     const dLat = (clientePoint.lat - RESTAURANTE.lat) * Math.PI / 180;
     const dLng = (clientePoint.lng - RESTAURANTE.lng) * Math.PI / 180;
@@ -520,6 +508,7 @@ const GOOGLE_MAPS_API_KEY = "TU_API_KEY_AQUI";  // 👈 CAMBIA ESTO
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     const distanciaKm = R * c;
     
+    // Cálculo de costo
     let costo;
     if (distanciaKm <= 1.5) {
       costo = 2.00;
@@ -542,6 +531,9 @@ const GOOGLE_MAPS_API_KEY = "TU_API_KEY_AQUI";  // 👈 CAMBIA ESTO
         <button id="whatsappBtn" style="width: 100%; margin-top: 15px; background: white; color: #DE440D; border: none; padding: 12px; border-radius: 40px; font-weight: 600; cursor: pointer;">
           📱 Enviar por WhatsApp
         </button>
+        <button id="copyBtn" style="width: 100%; margin-top: 10px; background: transparent; color: white; border: 1px solid white; padding: 10px; border-radius: 40px; cursor: pointer;">
+          📋 Copiar resumen
+        </button>
       </div>
     `;
     
@@ -556,14 +548,25 @@ const GOOGLE_MAPS_API_KEY = "TU_API_KEY_AQUI";  // 👈 CAMBIA ESTO
     
     setTimeout(() => {
       const whatsappBtn = document.getElementById('whatsappBtn');
+      const copyBtn = document.getElementById('copyBtn');
+      
       if (whatsappBtn) {
         whatsappBtn.onclick = () => {
           const mensaje = `🚀 *CODA EXPRESS* 🚀%0A%0A📋 *Cliente:* ${resultadoData.nombre}%0A📞 *Teléfono:* ${resultadoData.telefono}%0A📍 *Dirección:* ${resultadoData.direccion}%0A%0A🚗 *Distancia:* ${resultadoData.distancia.toFixed(2)} km%0A⏱️ *Tiempo:* ${resultadoData.tiempoEntrega}%0A%0A💰 *Costo total: $${resultadoData.costo.toFixed(2)}*%0A%0A¡Gracias por usar Coda Express! 🚀`;
           window.open(`https://wa.me/${resultadoData.telefono.replace(/\D/g, '')}?text=${mensaje}`, '_blank');
         };
       }
+      
+      if (copyBtn) {
+        copyBtn.onclick = () => {
+          const texto = `CODA EXPRESS\n\nCliente: ${resultadoData.nombre}\nTeléfono: ${resultadoData.telefono}\nDirección: ${resultadoData.direccion}\nDistancia: ${resultadoData.distancia.toFixed(2)} km\nTiempo: ${resultadoData.tiempoEntrega}\nCosto: $${resultadoData.costo.toFixed(2)}`;
+          navigator.clipboard.writeText(texto);
+          showToast('📋 Resumen copiado', 'success');
+        };
+      }
     }, 100);
     
+    // Guardar en historial
     const historial = JSON.parse(localStorage.getItem('coda_historial') || '[]');
     historial.unshift({ ...resultadoData, fecha: new Date().toISOString() });
     if (historial.length > 20) historial.pop();
@@ -580,20 +583,30 @@ const GOOGLE_MAPS_API_KEY = "TU_API_KEY_AQUI";  // 👈 CAMBIA ESTO
       document.body.classList.remove('dark');
       darkModeBtn.textContent = '🌙';
     }
+    // Recargar mapa con nuevo estilo
+    if (map && window.google) {
+      const newStyles = isDarkMode ? [
+        { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+        { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+        { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] }
+      ] : [];
+      map.setOptions({ styles: newStyles });
+    }
   }
   
   function showHelp() {
-    alert('🚀 CODA EXPRESS - Ayuda rápida\n\n1. 📍 Busca la ubicación del cliente\n2. 📝 Completa los datos\n3. 🚗 Presiona "Calcular costo"\n4. 📱 Envía por WhatsApp\n\n💡 Haz clic en el mapa para marcar manualmente');
+    alert('🚀 CODA EXPRESS - Ayuda rápida\n\n' +
+      '1. 📍 Busca la ubicación del cliente (link o dirección)\n' +
+      '2. 📝 Completa los datos del cliente\n' +
+      '3. 🚗 Presiona "Calcular costo de entrega"\n' +
+      '4. 📱 Envía el resumen por WhatsApp\n\n' +
+      '💡 Puedes hacer clic en el mapa para marcar la ubicación manualmente\n\n' +
+      '📲 Instala la app para usarla sin internet');
   }
   
   // Cargar Google Maps
   function loadGoogleMaps() {
-    if (!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY === "TU_API_KEY_AQUI") {
-      document.getElementById('map').innerHTML = '<div class="loading">⚠️ Configura tu API Key de Google Maps en el código<br><small>Línea ~160: GOOGLE_MAPS_API_KEY</small></div>';
-      showToast('⚠️ Configura tu API Key de Google Maps', 'error');
-      return;
-    }
-    
     const script = document.createElement('script');
     script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initMapCallback&libraries=geometry,places`;
     script.async = true;
@@ -604,6 +617,7 @@ const GOOGLE_MAPS_API_KEY = "TU_API_KEY_AQUI";  // 👈 CAMBIA ESTO
     document.head.appendChild(script);
   }
   
+  // Eventos
   searchBtn.onclick = buscarDireccion;
   calcularBtn.onclick = calcularDistanciaYCosto;
   darkModeBtn.onclick = toggleDarkMode;
@@ -613,11 +627,13 @@ const GOOGLE_MAPS_API_KEY = "TU_API_KEY_AQUI";  // 👈 CAMBIA ESTO
     if (e.key === 'Enter') buscarDireccion();
   });
   
+  // Aplicar dark mode guardado
   if (isDarkMode) {
     document.body.classList.add('dark');
     darkModeBtn.textContent = '☀️';
   }
   
+  // Ocultar splash
   setTimeout(() => {
     splash.classList.add('hide');
     setTimeout(() => {
@@ -625,8 +641,7 @@ const GOOGLE_MAPS_API_KEY = "TU_API_KEY_AQUI";  // 👈 CAMBIA ESTO
     }, 500);
   }, 1500);
   
-  loadGoogleMaps();
-  
+  // Cargar datos guardados
   const savedNombre = localStorage.getItem('coda_nombre');
   const savedTelefono = localStorage.getItem('coda_telefono');
   if (savedNombre) nombreInput.value = savedNombre;
@@ -635,7 +650,10 @@ const GOOGLE_MAPS_API_KEY = "TU_API_KEY_AQUI";  // 👈 CAMBIA ESTO
   nombreInput.addEventListener('change', () => localStorage.setItem('coda_nombre', nombreInput.value));
   telefonoInput.addEventListener('change', () => localStorage.setItem('coda_telefono', telefonoInput.value));
   
-  // PWA Installation
+  // Iniciar
+  loadGoogleMaps();
+  
+  // PWA Instalación
   let deferredPrompt;
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
@@ -646,28 +664,84 @@ const GOOGLE_MAPS_API_KEY = "TU_API_KEY_AQUI";  // 👈 CAMBIA ESTO
   installBtn.addEventListener('click', async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        showToast('🎉 ¡App instalada!', 'success');
+      }
       installBtn.classList.remove('show');
       deferredPrompt = null;
     }
   });
   
+  // iOS
   if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.navigator.standalone) {
-    setTimeout(() => showToast('📱 En iOS: Compartir → "Agregar a pantalla de inicio"', 'info'), 2000);
+    setTimeout(() => {
+      showToast('📱 En iOS: Compartir → "Agregar a pantalla de inicio"', 'info');
+    }, 2000);
   }
 })();
 
-// Service Worker embebido
+// Service Worker embebido para PWA
 if ('serviceWorker' in navigator) {
-  const swCode = `const CACHE_NAME = 'coda-v1';
-self.addEventListener('fetch', e => {
-  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+  const swCode = `const CACHE_NAME = 'coda-express-v1';
+const urlsToCache = ['/', '/index.html'];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request).catch(() => {
+        if (event.request.mode === 'navigate') {
+          return caches.match('/');
+        }
+      });
+    })
+  );
 });`;
+  
   const blob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+  
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register(URL.createObjectURL(blob));
+    navigator.serviceWorker.register(swUrl).then(reg => {
+      console.log('✅ Service Worker registrado');
+    }).catch(err => {
+      console.error('❌ Error SW:', err);
+    });
   });
 }
+
+// Manifest dinámico para PWA
+const manifestData = {
+  short_name: "CodaExpress",
+  name: "Coda Express - Entregas",
+  description: "Calcula el costo de tus entregas",
+  icons: [
+    { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23DE440D'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white'%3E🚀%3C/text%3E%3C/svg%3E", type: "image/svg+xml", sizes: "any" },
+    { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%23DE440D'/%3E%3Ctext x='96' y='128' font-size='96' text-anchor='middle' fill='white'%3E🚀%3C/text%3E%3C/svg%3E", type: "image/svg+xml", sizes: "192x192" },
+    { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23DE440D'/%3E%3Ctext x='256' y='340' font-size='256' text-anchor='middle' fill='white'%3E🚀%3C/text%3E%3C/svg%3E", type: "image/svg+xml", sizes: "512x512" }
+  ],
+  start_url: "/Gabriel_CodaExpress/",
+  display: "standalone",
+  scope: "/Gabriel_CodaExpress/",
+  theme_color: "#DE440D",
+  background_color: "#ffffff"
+};
+
+const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: "application/json" });
+const manifestURL = URL.createObjectURL(manifestBlob);
+let manifestLink = document.querySelector('link[rel="manifest"]');
+if (!manifestLink) {
+  manifestLink = document.createElement('link');
+  manifestLink.rel = 'manifest';
+  document.head.appendChild(manifestLink);
+}
+manifestLink.href = manifestURL;
 </script>
 </body>
 </html>
