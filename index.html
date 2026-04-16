@@ -5,29 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Mi PWA - App Instalable</title>
   
-  <!-- ========== FAVICONS (usando tus archivos) ========== -->
-  <!-- Favicon estándar -->
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- ========== FAVICONS ========== -->
+  <link rel="icon" type="image/x-icon" href="/Gabriel_CodaExpress/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/Gabriel_CodaExpress/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/Gabriel_CodaExpress/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/Gabriel_CodaExpress/favicon-48x48.png">
+  <link rel="icon" type="image/svg+xml" href="/Gabriel_CodaExpress/favicon.svg">
   
-  <!-- Apple Touch Icons (para iOS) -->
-  <link rel="apple-touch-icon" sizes="152x152" href="/icono-touch-apple-152x152.png">
-  <link rel="apple-touch-icon" sizes="167x167" href="/icono-touch-apple-167x167.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/icono-touch-apple-180x180.png">
+  <!-- Apple Touch Icons -->
+  <link rel="apple-touch-icon" sizes="152x152" href="/Gabriel_CodaExpress/icono-touch-apple-152x152.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="/Gabriel_CodaExpress/icono-touch-apple-167x167.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/Gabriel_CodaExpress/icono-touch-apple-180x180.png">
   
   <!-- Android Chrome -->
-  <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/Gabriel_CodaExpress/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/Gabriel_CodaExpress/android-chrome-512x512.png">
   
   <!-- Safari pinned tab -->
-  <link rel="mask-icon" href="/pestaña-fijada-de-safari.svg" color="#667eea">
-  <!-- ========== FIN FAVICONS ========== -->
+  <link rel="mask-icon" href="/Gabriel_CodaExpress/pestaña-fijada-de-safari.svg" color="#667eea">
   
   <!-- Enlace al manifest.json -->
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="/Gabriel_CodaExpress/manifest.json">
   
   <!-- Tema de color -->
   <meta name="theme-color" content="#667eea">
@@ -164,10 +162,15 @@
   </div>
 
   <script>
+    // NOMBRE DEL REPOSITORIO
+    const REPO_NAME = 'Gabriel_CodaExpress';
+    
     // REGISTRO DEL SERVICE WORKER
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register(`/${REPO_NAME}/sw.js`, {
+          scope: `/${REPO_NAME}/`
+        })
           .then(registration => {
             console.log('✅ Service Worker registrado:', registration);
             document.getElementById('status').innerHTML = '✅ App lista. Funciona sin conexión.';
