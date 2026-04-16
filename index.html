@@ -6,7 +6,6 @@
   <meta name="theme-color" content="#DE440D">
   <meta name="description" content="Coda Express - Calcula el costo de tus entregas">
   
-  <!-- iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Coda Express">
@@ -14,7 +13,6 @@
   <title>Coda Express</title>
   
   <style>
-    /* ========== ESTILOS ========== */
     * {
       margin: 0;
       padding: 0;
@@ -44,7 +42,6 @@
       transition: background-color 0.3s, color 0.3s;
     }
     
-    /* Contenedor principal */
     .container {
       max-width: 1200px;
       margin: 0 auto;
@@ -52,7 +49,6 @@
       min-height: 100vh;
     }
     
-    /* Header */
     .header {
       display: flex;
       justify-content: space-between;
@@ -89,7 +85,6 @@
       color: transparent;
     }
     
-    /* Botones */
     .btn-primary {
       background: linear-gradient(135deg, var(--coda), var(--coda-dark));
       color: white;
@@ -123,7 +118,6 @@
       color: white;
     }
     
-    /* Grid */
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -140,17 +134,14 @@
       }
     }
     
-    /* Tarjetas */
     .card {
       background: var(--card-bg);
       border-radius: 24px;
       padding: 24px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.05);
       border: 1px solid var(--border);
-      transition: transform 0.2s;
     }
     
-    /* Inputs */
     input, textarea, select {
       width: 100%;
       padding: 14px 16px;
@@ -169,16 +160,23 @@
       box-shadow: 0 0 0 3px rgba(222, 68, 13, 0.1);
     }
     
-    /* Mapa */
     .map-container {
       height: 300px;
       border-radius: 16px;
       overflow: hidden;
       margin-top: 15px;
       border: 1px solid var(--border);
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
-    /* Resultado */
+    .map-placeholder {
+      text-align: center;
+      color: #666;
+    }
+    
     .result-card {
       background: linear-gradient(135deg, var(--coda), var(--coda-dark));
       border-radius: 24px;
@@ -193,7 +191,6 @@
       margin: 10px 0;
     }
     
-    /* Toast */
     .toast {
       position: fixed;
       bottom: 30px;
@@ -205,6 +202,7 @@
       font-weight: 500;
       z-index: 1000;
       animation: slideUp 0.3s ease;
+      display: none;
     }
     
     .toast.success { background: #10b981; }
@@ -216,7 +214,6 @@
       to { opacity: 1; transform: translateX(-50%) translateY(0); }
     }
     
-    /* Botón instalación */
     .install-btn {
       position: fixed;
       bottom: 20px;
@@ -237,7 +234,6 @@
       display: block;
     }
     
-    /* Badges */
     .badge {
       display: inline-block;
       background: var(--border);
@@ -247,7 +243,6 @@
       margin: 4px;
     }
     
-    /* Footer */
     .footer {
       text-align: center;
       margin-top: 40px;
@@ -257,7 +252,6 @@
       color: #94a3b8;
     }
     
-    /* Splash screen */
     .splash {
       position: fixed;
       inset: 0;
@@ -290,6 +284,12 @@
       font-size: 56px;
       margin-bottom: 20px;
     }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--coda);
+    }
   </style>
 </head>
 <body>
@@ -313,18 +313,18 @@
   </div>
   
   <div class="grid">
-    <!-- Columna izquierda - Mapa y ubicación -->
     <div class="card">
       <h3 style="margin-bottom: 15px;">📍 Ubicación del cliente</h3>
       <input type="text" id="locationInput" placeholder="Pega un link de Google Maps o escribe una dirección">
       <button class="btn-primary" id="searchBtn" style="width: 100%;">Buscar ubicación</button>
-      <div id="map" class="map-container"></div>
+      <div id="map" class="map-container">
+        <div class="loading">🔄 Cargando mapa...</div>
+      </div>
       <p style="font-size: 12px; margin-top: 10px; color: #94a3b8;">
         💡 Haz clic en el mapa para marcar la ubicación manualmente
       </p>
     </div>
     
-    <!-- Columna derecha - Datos del cliente -->
     <div class="card">
       <h3 style="margin-bottom: 15px;">📋 Datos del cliente</h3>
       <input type="text" id="nombreInput" placeholder="Nombre completo">
@@ -357,14 +357,16 @@
 </div>
 
 <button class="install-btn" id="installBtn">📲 Instalar Coda Express</button>
-<div id="toast" class="toast" style="display: none;"></div>
+<div id="toast" class="toast"></div>
 
 <script>
-// ========== CODA EXPRESS - APP COMPLETA ==========
-// Todo en un solo archivo HTML con PWA incluida
+// ========== ⚠️ IMPORTANTE: REEMPLAZA ESTA API KEY CON LA TUYA ==========
+// Ve a: https://console.cloud.google.com/
+// Crea un proyecto y activa: Maps JavaScript API, Geocoding API, Places API
+const GOOGLE_MAPS_API_KEY = "TU_API_KEY_AQUI";  // 👈 CAMBIA ESTO
+// ====================================================================
 
 (function() {
-  // ---------- ELEMENTOS DOM ----------
   const splash = document.getElementById('splash');
   const locationInput = document.getElementById('locationInput');
   const searchBtn = document.getElementById('searchBtn');
@@ -378,78 +380,81 @@
   const helpBtn = document.getElementById('helpBtn');
   const installBtn = document.getElementById('installBtn');
   
-  // ---------- ESTADO ----------
   let map = null;
   let marker = null;
   let clientePoint = null;
   let isDarkMode = localStorage.getItem('darkMode') === 'true';
   
-  // Ubicación del restaurante (La Cremita - Santo Domingo)
   const RESTAURANTE = { lat: -0.245197, lng: -79.158230 };
   
-  // ---------- INICIALIZAR MAPA ----------
+  function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast ${type}`;
+    toast.style.display = 'block';
+    setTimeout(() => {
+      toast.style.display = 'none';
+    }, 3000);
+  }
+  
   function initMap() {
     if (!window.google || !window.google.maps) {
       console.error('Google Maps no cargado');
+      document.getElementById('map').innerHTML = '<div class="loading">❌ Error cargando mapa. Verifica tu API Key</div>';
       return;
     }
     
-    map = new google.maps.Map(document.getElementById('map'), {
-      center: RESTAURANTE,
-      zoom: 14,
-      styles: isDarkMode ? darkMapStyle : lightMapStyle
-    });
-    
-    // Marcador del restaurante
-    new google.maps.Marker({
-      position: RESTAURANTE,
-      map: map,
-      title: 'La Cremita',
-      icon: {
-        url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
-      }
-    });
-    
-    // Marcador del cliente
-    marker = new google.maps.Marker({
-      position: RESTAURANTE,
-      map: map,
-      title: 'Cliente',
-      icon: {
-        url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png'
-      },
-      draggable: true
-    });
-    
-    // Evento drag del marcador
-    marker.addListener('dragend', () => {
-      const pos = marker.getPosition();
-      clientePoint = { lat: pos.lat(), lng: pos.lng() };
-      reverseGeocode(clientePoint);
-    });
-    
-    // Evento click en el mapa
-    map.addListener('click', (e) => {
-      const pos = e.latLng;
-      clientePoint = { lat: pos.lat(), lng: pos.lng() };
-      marker.setPosition(pos);
-      reverseGeocode(clientePoint);
-    });
+    try {
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: RESTAURANTE,
+        zoom: 14,
+        styles: isDarkMode ? darkMapStyle : lightMapStyle
+      });
+      
+      new google.maps.Marker({
+        position: RESTAURANTE,
+        map: map,
+        title: 'La Cremita',
+        icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' }
+      });
+      
+      marker = new google.maps.Marker({
+        position: RESTAURANTE,
+        map: map,
+        title: 'Cliente',
+        icon: { url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' },
+        draggable: true
+      });
+      
+      marker.addListener('dragend', () => {
+        const pos = marker.getPosition();
+        clientePoint = { lat: pos.lat(), lng: pos.lng() };
+        reverseGeocode(clientePoint);
+      });
+      
+      map.addListener('click', (e) => {
+        const pos = e.latLng;
+        clientePoint = { lat: pos.lat(), lng: pos.lng() };
+        marker.setPosition(pos);
+        reverseGeocode(clientePoint);
+      });
+      
+      showToast('✅ Mapa cargado correctamente', 'success');
+    } catch (error) {
+      console.error('Error en mapa:', error);
+      document.getElementById('map').innerHTML = '<div class="loading">❌ Error al cargar el mapa</div>';
+    }
   }
   
-  // Estilos del mapa
   const lightMapStyle = [];
-  const darkMapStyle = [{ elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+  const darkMapStyle = [
+    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
     { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-    { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-    { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
     { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
-    { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
     { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] },
-    { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] }];
+    { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] }
+  ];
   
-  // Reverse geocoding para obtener dirección
   function reverseGeocode(point) {
     const geocoder = new google.maps.Geocoder();
     geocoder.geocode({ location: point }, (results, status) => {
@@ -459,123 +464,6 @@
     });
   }
   
-  // ---------- CALCULAR DISTANCIA Y COSTO ----------
-  function calcularDistanciaYCosto() {
-    if (!clientePoint) {
-      showToast('⚠️ Selecciona una ubicación en el mapa', 'error');
-      return;
-    }
-    
-    if (!nombreInput.value.trim()) {
-      showToast('⚠️ Ingresa el nombre del cliente', 'error');
-      return;
-    }
-    
-    if (!telefonoInput.value.trim()) {
-      showToast('⚠️ Ingresa el teléfono del cliente', 'error');
-      return;
-    }
-    
-    // Calcular distancia
-    const R = 6371; // Radio de la Tierra en km
-    const dLat = (clientePoint.lat - RESTAURANTE.lat) * Math.PI / 180;
-    const dLng = (clientePoint.lng - RESTAURANTE.lng) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(RESTAURANTE.lat * Math.PI / 180) * Math.cos(clientePoint.lat * Math.PI / 180) *
-              Math.sin(dLng/2) * Math.sin(dLng/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    const distanciaKm = R * c;
-    
-    // Calcular costo
-    let costo;
-    if (distanciaKm <= 1.5) {
-      costo = 2.00;
-    } else {
-      const kmAdicionales = distanciaKm - 1.5;
-      const incrementos = Math.floor(kmAdicionales / 0.85);
-      costo = 2.50 + (incrementos * 0.25);
-    }
-    costo = Math.ceil(costo * 4) / 4;
-    
-    const tiempoEntrega = tiempoInput.value;
-    
-    // Mostrar resultado
-    resultadoDiv.style.display = 'block';
-    resultadoDiv.innerHTML = `
-      <div class="result-card">
-        <span style="opacity: 0.8;">🚗 Distancia</span>
-        <div style="font-size: 1.2rem;">${distanciaKm.toFixed(2)} km</div>
-        <div class="price">$${costo.toFixed(2)}</div>
-        <span style="opacity: 0.8;">⏱️ ${tiempoEntrega}</span>
-        <button id="whatsappBtn" style="width: 100%; margin-top: 15px; background: white; color: #DE440D; border: none; padding: 12px; border-radius: 40px; font-weight: 600; cursor: pointer;">
-          📱 Enviar por WhatsApp
-        </button>
-        <button id="copiarBtn" style="width: 100%; margin-top: 10px; background: transparent; color: white; border: 1px solid white; padding: 10px; border-radius: 40px; cursor: pointer;">
-          📋 Copiar resumen
-        </button>
-      </div>
-    `;
-    
-    // Guardar resultado para WhatsApp
-    const resultadoData = {
-      distancia: distanciaKm,
-      costo: costo,
-      nombre: nombreInput.value,
-      telefono: telefonoInput.value,
-      direccion: direccionInput.value || 'No especificada',
-      tiempoEntrega: tiempoEntrega
-    };
-    
-    // Evento WhatsApp
-    setTimeout(() => {
-      const whatsappBtn = document.getElementById('whatsappBtn');
-      const copiarBtn = document.getElementById('copiarBtn');
-      
-      if (whatsappBtn) {
-        whatsappBtn.onclick = () => enviarWhatsApp(resultadoData);
-      }
-      if (copiarBtn) {
-        copiarBtn.onclick = () => copiarResumen(resultadoData);
-      }
-    }, 100);
-    
-    // Guardar en historial local
-    guardarHistorial(resultadoData);
-  }
-  
-  function enviarWhatsApp(data) {
-    const mensaje = `🚀 *CODA EXPRESS* 🚀%0A%0A` +
-      `📋 *Datos del cliente*%0A` +
-      `Nombre: ${data.nombre}%0A` +
-      `Teléfono: ${data.telefono}%0A` +
-      `Dirección: ${data.direccion}%0A%0A` +
-      `🚗 *Detalles de la entrega*%0A` +
-      `Distancia: ${data.distancia.toFixed(2)} km%0A` +
-      `Tiempo: ${data.tiempoEntrega}%0A%0A` +
-      `💰 *Costo total: $${data.costo.toFixed(2)}*%0A%0A` +
-      `¡Gracias por usar Coda Express! 🚀`;
-    
-    const url = `https://wa.me/${data.telefono.replace(/\D/g, '')}?text=${mensaje}`;
-    window.open(url, '_blank');
-  }
-  
-  function copiarResumen(data) {
-    const texto = `CODA EXPRESS\n\nCliente: ${data.nombre}\nTeléfono: ${data.telefono}\nDirección: ${data.direccion}\nDistancia: ${data.distancia.toFixed(2)} km\nTiempo: ${data.tiempoEntrega}\nCosto: $${data.costo.toFixed(2)}`;
-    navigator.clipboard.writeText(texto);
-    showToast('📋 Resumen copiado', 'success');
-  }
-  
-  function guardarHistorial(data) {
-    const historial = JSON.parse(localStorage.getItem('coda_historial') || '[]');
-    historial.unshift({
-      ...data,
-      fecha: new Date().toISOString()
-    });
-    if (historial.length > 20) historial.pop();
-    localStorage.setItem('coda_historial', JSON.stringify(historial));
-  }
-  
-  // ---------- BUSCAR DIRECCIÓN ----------
   function buscarDireccion() {
     const query = locationInput.value.trim();
     if (!query) {
@@ -585,23 +473,18 @@
     
     showToast('🔍 Buscando ubicación...', 'info');
     
-    // Verificar si es link de Google Maps
-    if (query.includes('google.com/maps') || query.includes('maps.app.goo.gl')) {
-      // Extraer coordenadas del link
-      const latMatch = query.match(/@([-\d.]+),([-\d.]+)/);
-      if (latMatch) {
-        const lat = parseFloat(latMatch[1]);
-        const lng = parseFloat(latMatch[2]);
-        clientePoint = { lat, lng };
-        if (marker) marker.setPosition({ lat, lng });
-        if (map) map.panTo({ lat, lng });
-        reverseGeocode(clientePoint);
-        showToast('📍 Ubicación encontrada', 'success');
-        return;
-      }
+    const latMatch = query.match(/@([-\d.]+),([-\d.]+)/);
+    if (latMatch) {
+      const lat = parseFloat(latMatch[1]);
+      const lng = parseFloat(latMatch[2]);
+      clientePoint = { lat, lng };
+      if (marker) marker.setPosition({ lat, lng });
+      if (map) map.panTo({ lat, lng });
+      reverseGeocode(clientePoint);
+      showToast('📍 Ubicación encontrada', 'success');
+      return;
     }
     
-    // Usar geocoding
     const geocoder = new google.maps.Geocoder();
     geocoder.geocode({ address: query }, (results, status) => {
       if (status === 'OK' && results[0]) {
@@ -617,7 +500,76 @@
     });
   }
   
-  // ---------- DARK MODE ----------
+  function calcularDistanciaYCosto() {
+    if (!clientePoint) {
+      showToast('⚠️ Selecciona una ubicación en el mapa', 'error');
+      return;
+    }
+    
+    if (!nombreInput.value.trim()) {
+      showToast('⚠️ Ingresa el nombre del cliente', 'error');
+      return;
+    }
+    
+    const R = 6371;
+    const dLat = (clientePoint.lat - RESTAURANTE.lat) * Math.PI / 180;
+    const dLng = (clientePoint.lng - RESTAURANTE.lng) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(RESTAURANTE.lat * Math.PI / 180) * Math.cos(clientePoint.lat * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distanciaKm = R * c;
+    
+    let costo;
+    if (distanciaKm <= 1.5) {
+      costo = 2.00;
+    } else {
+      const kmAdicionales = distanciaKm - 1.5;
+      const incrementos = Math.floor(kmAdicionales / 0.85);
+      costo = 2.50 + (incrementos * 0.25);
+    }
+    costo = Math.ceil(costo * 4) / 4;
+    
+    const tiempoEntrega = tiempoInput.value;
+    
+    resultadoDiv.style.display = 'block';
+    resultadoDiv.innerHTML = `
+      <div class="result-card">
+        <span style="opacity: 0.8;">🚗 Distancia</span>
+        <div style="font-size: 1.2rem;">${distanciaKm.toFixed(2)} km</div>
+        <div class="price">$${costo.toFixed(2)}</div>
+        <span style="opacity: 0.8;">⏱️ ${tiempoEntrega}</span>
+        <button id="whatsappBtn" style="width: 100%; margin-top: 15px; background: white; color: #DE440D; border: none; padding: 12px; border-radius: 40px; font-weight: 600; cursor: pointer;">
+          📱 Enviar por WhatsApp
+        </button>
+      </div>
+    `;
+    
+    const resultadoData = {
+      distancia: distanciaKm,
+      costo: costo,
+      nombre: nombreInput.value,
+      telefono: telefonoInput.value,
+      direccion: direccionInput.value || 'No especificada',
+      tiempoEntrega: tiempoEntrega
+    };
+    
+    setTimeout(() => {
+      const whatsappBtn = document.getElementById('whatsappBtn');
+      if (whatsappBtn) {
+        whatsappBtn.onclick = () => {
+          const mensaje = `🚀 *CODA EXPRESS* 🚀%0A%0A📋 *Cliente:* ${resultadoData.nombre}%0A📞 *Teléfono:* ${resultadoData.telefono}%0A📍 *Dirección:* ${resultadoData.direccion}%0A%0A🚗 *Distancia:* ${resultadoData.distancia.toFixed(2)} km%0A⏱️ *Tiempo:* ${resultadoData.tiempoEntrega}%0A%0A💰 *Costo total: $${resultadoData.costo.toFixed(2)}*%0A%0A¡Gracias por usar Coda Express! 🚀`;
+          window.open(`https://wa.me/${resultadoData.telefono.replace(/\D/g, '')}?text=${mensaje}`, '_blank');
+        };
+      }
+    }, 100);
+    
+    const historial = JSON.parse(localStorage.getItem('coda_historial') || '[]');
+    historial.unshift({ ...resultadoData, fecha: new Date().toISOString() });
+    if (historial.length > 20) historial.pop();
+    localStorage.setItem('coda_historial', JSON.stringify(historial));
+  }
+  
   function toggleDarkMode() {
     isDarkMode = !isDarkMode;
     localStorage.setItem('darkMode', isDarkMode);
@@ -630,47 +582,28 @@
     }
   }
   
-  // ---------- HELP MODAL ----------
   function showHelp() {
-    alert('🚀 CODA EXPRESS - Ayuda rápida\n\n' +
-      '1. 📍 Busca la ubicación del cliente (link o dirección)\n' +
-      '2. 📝 Completa los datos del cliente\n' +
-      '3. 🚗 Presiona "Calcular costo"\n' +
-      '4. 📱 Envía el resumen por WhatsApp\n\n' +
-      '💡 Puedes hacer clic en el mapa para marcar la ubicación manualmente\n\n' +
-      '📲 Instala la app para usarla sin internet');
+    alert('🚀 CODA EXPRESS - Ayuda rápida\n\n1. 📍 Busca la ubicación del cliente\n2. 📝 Completa los datos\n3. 🚗 Presiona "Calcular costo"\n4. 📱 Envía por WhatsApp\n\n💡 Haz clic en el mapa para marcar manualmente');
   }
   
-  // ---------- TOAST ----------
-  function showToast(message, type = 'info') {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.className = `toast ${type}`;
-    toast.style.display = 'block';
-    setTimeout(() => {
-      toast.style.display = 'none';
-    }, 3000);
-  }
-  
-  // ---------- SPLASH SCREEN ----------
-  setTimeout(() => {
-    splash.classList.add('hide');
-    setTimeout(() => {
-      splash.style.display = 'none';
-    }, 500);
-  }, 1500);
-  
-  // ---------- CARGAR GOOGLE MAPS ----------
+  // Cargar Google Maps
   function loadGoogleMaps() {
+    if (!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY === "TU_API_KEY_AQUI") {
+      document.getElementById('map').innerHTML = '<div class="loading">⚠️ Configura tu API Key de Google Maps en el código<br><small>Línea ~160: GOOGLE_MAPS_API_KEY</small></div>';
+      showToast('⚠️ Configura tu API Key de Google Maps', 'error');
+      return;
+    }
+    
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDZqLHpuKkLbQ3nDpPizXQkqfLqJ5lZpUI&callback=initMap&libraries=geometry,places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initMapCallback&libraries=geometry,places`;
     script.async = true;
     script.defer = true;
-    window.initMap = initMap;
+    window.initMapCallback = () => {
+      initMap();
+    };
     document.head.appendChild(script);
   }
   
-  // ---------- EVENTOS ----------
   searchBtn.onclick = buscarDireccion;
   calcularBtn.onclick = calcularDistanciaYCosto;
   darkModeBtn.onclick = toggleDarkMode;
@@ -680,15 +613,30 @@
     if (e.key === 'Enter') buscarDireccion();
   });
   
-  // Aplicar dark mode inicial
   if (isDarkMode) {
     document.body.classList.add('dark');
     darkModeBtn.textContent = '☀️';
   }
   
-  // ---------- PWA: INSTALACIÓN ----------
-  let deferredPrompt;
+  setTimeout(() => {
+    splash.classList.add('hide');
+    setTimeout(() => {
+      splash.style.display = 'none';
+    }, 500);
+  }, 1500);
   
+  loadGoogleMaps();
+  
+  const savedNombre = localStorage.getItem('coda_nombre');
+  const savedTelefono = localStorage.getItem('coda_telefono');
+  if (savedNombre) nombreInput.value = savedNombre;
+  if (savedTelefono) telefonoInput.value = savedTelefono;
+  
+  nombreInput.addEventListener('change', () => localStorage.setItem('coda_nombre', nombreInput.value));
+  telefonoInput.addEventListener('change', () => localStorage.setItem('coda_telefono', telefonoInput.value));
+  
+  // PWA Installation
+  let deferredPrompt;
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
@@ -698,103 +646,28 @@
   installBtn.addEventListener('click', async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        showToast('🎉 ¡App instalada!', 'success');
-      }
+      await deferredPrompt.userChoice;
       installBtn.classList.remove('show');
       deferredPrompt = null;
     }
   });
   
-  // Detectar si ya está instalada
-  window.addEventListener('appinstalled', () => {
-    showToast('🎉 ¡Gracias por instalar Coda Express!', 'success');
-    installBtn.classList.remove('show');
-  });
-  
-  // Instrucciones para iOS
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  if (isIOS && !window.navigator.standalone) {
-    setTimeout(() => {
-      showToast('📱 En iOS: Compartir → "Agregar a pantalla de inicio"', 'info');
-    }, 2000);
+  if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.navigator.standalone) {
+    setTimeout(() => showToast('📱 En iOS: Compartir → "Agregar a pantalla de inicio"', 'info'), 2000);
   }
-  
-  // ---------- INICIAR APP ----------
-  loadGoogleMaps();
-  
-  // Cargar datos guardados
-  const savedNombre = localStorage.getItem('coda_nombre');
-  const savedTelefono = localStorage.getItem('coda_telefono');
-  if (savedNombre) nombreInput.value = savedNombre;
-  if (savedTelefono) telefonoInput.value = savedTelefono;
-  
-  nombreInput.addEventListener('change', () => localStorage.setItem('coda_nombre', nombreInput.value));
-  telefonoInput.addEventListener('change', () => localStorage.setItem('coda_telefono', telefonoInput.value));
 })();
 
-// ========== SERVICE WORKER EMBEBIDO ==========
+// Service Worker embebido
 if ('serviceWorker' in navigator) {
-  const swCode = `const CACHE_NAME = 'coda-express-v1';
-const urlsToCache = ['/', '/index.html', '/offline'];
-
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)).then(() => self.skipWaiting())
-  );
-});
-
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request).catch(() => {
-        if (event.request.mode === 'navigate') {
-          return caches.match('/');
-        }
-      });
-    })
-  );
+  const swCode = `const CACHE_NAME = 'coda-v1';
+self.addEventListener('fetch', e => {
+  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
 });`;
-  
   const blob = new Blob([swCode], { type: 'application/javascript' });
-  const swUrl = URL.createObjectURL(blob);
-  
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register(swUrl).then(reg => {
-      console.log('✅ Service Worker registrado:', reg);
-    }).catch(err => {
-      console.error('❌ Error SW:', err);
-    });
+    navigator.serviceWorker.register(URL.createObjectURL(blob));
   });
 }
-
-// ========== MANIFEST DINÁMICO ==========
-const manifestData = {
-  short_name: "CodaExpress",
-  name: "Coda Express - Entregas",
-  description: "Calcula el costo de tus entregas",
-  icons: [
-    { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23DE440D'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white'%3E🚀%3C/text%3E%3C/svg%3E", type: "image/svg+xml", sizes: "any" },
-    { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%23DE440D'/%3E%3Ctext x='96' y='128' font-size='96' text-anchor='middle' fill='white'%3E🚀%3C/text%3E%3C/svg%3E", type: "image/svg+xml", sizes: "192x192" },
-    { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23DE440D'/%3E%3Ctext x='256' y='340' font-size='256' text-anchor='middle' fill='white'%3E🚀%3C/text%3E%3C/svg%3E", type: "image/svg+xml", sizes: "512x512" }
-  ],
-  start_url: "/Gabriel_CodaExpress/",
-  display: "standalone",
-  scope: "/Gabriel_CodaExpress/",
-  theme_color: "#DE440D",
-  background_color: "#ffffff"
-};
-
-const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: "application/json" });
-const manifestURL = URL.createObjectURL(manifestBlob);
-let manifestLink = document.querySelector('link[rel="manifest"]');
-if (!manifestLink) {
-  manifestLink = document.createElement('link');
-  manifestLink.rel = 'manifest';
-  document.head.appendChild(manifestLink);
-}
-manifestLink.href = manifestURL;
 </script>
 </body>
 </html>
