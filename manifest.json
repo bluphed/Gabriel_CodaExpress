@@ -1,23 +1,25 @@
 {
-  "short_name": "Coda EXpress",
-  "name": "Coda EXpress",
-  "description": "Una app para calcular precio segun la distancia",
+  "short_name": "CodaExpress",
+  "name": "Coda Express",
+  "description": "Calcula el costo de tus entregas",
+  "start_url": "/Gabriel_CodaExpress/",
+  "scope": "/Gabriel_CodaExpress/",
+  "display": "standalone",
+  "theme_color": "#DE440D",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/Gabriel_CodaExpress/android-chrome-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/Gabriel_CodaExpress/android-chrome-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ],
-  "start_url": "/Gabriel_CodaExpress/",
-  "display": "standalone",
-  "scope": "/Gabriel_CodaExpress/",
-  "theme_color": "#000000",
-  "background_color": "#DE440D",
-  "orientation": "portrait"
+  ]
 }
