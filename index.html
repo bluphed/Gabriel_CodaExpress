@@ -5,13 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Mi PWA - App Instalable</title>
   
-  <!-- Enlace al manifest.json externo -->
+  <!-- ========== FAVICONS (usando tus archivos) ========== -->
+  <!-- Favicon estándar -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  
+  <!-- Apple Touch Icons (para iOS) -->
+  <link rel="apple-touch-icon" sizes="152x152" href="/icono-touch-apple-152x152.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="/icono-touch-apple-167x167.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icono-touch-apple-180x180.png">
+  
+  <!-- Android Chrome -->
+  <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+  
+  <!-- Safari pinned tab -->
+  <link rel="mask-icon" href="/pestaña-fijada-de-safari.svg" color="#667eea">
+  <!-- ========== FIN FAVICONS ========== -->
+  
+  <!-- Enlace al manifest.json -->
   <link rel="manifest" href="/manifest.json">
   
-  <!-- Tema de color para la barra de direcciones -->
-  <meta name="theme-color" content="#000000">
+  <!-- Tema de color -->
+  <meta name="theme-color" content="#667eea">
   
-  <!-- Para iOS -->
+  <!-- iOS standalone -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="MiApp">
