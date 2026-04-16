@@ -10,7 +10,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Coda Express">
   
-  <!-- ========== FAVICON para pestaña del navegador ========== -->
+  <!-- Manifest PWA -->
+  <link rel="manifest" href="/Gabriel_CodaExpress/manifest.json">
+  
+  <!-- Favicon -->
   <link rel="icon" type="image/png" sizes="192x192" href="/Gabriel_CodaExpress/android-chrome-192x192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="/Gabriel_CodaExpress/android-chrome-512x512.png">
   <link rel="apple-touch-icon" href="/Gabriel_CodaExpress/android-chrome-192x192.png">
@@ -307,7 +310,6 @@
 </head>
 <body>
 
-<!-- Pantalla de carga SPLASH -->
 <div class="splash" id="splash">
   <div class="splash-logo">
     <img src="/Gabriel_CodaExpress/android-chrome-192x192.png" alt="Coda Express">
@@ -329,7 +331,6 @@
   </div>
   
   <div class="grid">
-    <!-- Columna izquierda - Mapa -->
     <div class="card">
       <h3>📍 Ubicación del cliente</h3>
       <input type="text" id="locationInput" placeholder="Pega un link de Google Maps o escribe una dirección">
@@ -342,7 +343,6 @@
       </p>
     </div>
     
-    <!-- Columna derecha - Datos -->
     <div class="card">
       <h3>📋 Datos del cliente</h3>
       <input type="text" id="nombreInput" placeholder="Nombre completo">
@@ -370,7 +370,7 @@
     <span class="badge">✅ Funciona offline</span>
     <span class="badge">📱 Instalable</span>
     <span class="badge">⚡ Cálculo rápido</span>
-    <p style="margin-top: 10px;">Coda Express © 2026 - Tu app de entregas</p>
+    <p style="margin-top: 10px;">Coda Express © 2026</p>
   </div>
 </div>
 
@@ -378,7 +378,6 @@
 <div id="toast" class="toast"></div>
 
 <script>
-// ========== CODA EXPRESS ==========
 const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
 
 (function() {
@@ -464,7 +463,6 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
       
       showToast('✅ Mapa cargado correctamente', 'success');
     } catch (error) {
-      console.error('Error:', error);
       document.getElementById('map').innerHTML = '<div class="loading-map">❌ Error al cargar el mapa</div>';
     }
   };
@@ -634,12 +632,7 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
   }
   
   function showHelp() {
-    alert('🚀 CODA EXPRESS - Ayuda rápida\n\n' +
-      '1. 📍 Busca la ubicación del cliente\n' +
-      '2. 📝 Completa los datos\n' +
-      '3. 🚗 Calcula costo\n' +
-      '4. 📱 Envía WhatsApp\n\n' +
-      '💡 Haz clic en el mapa para marcar la ubicación');
+    alert('🚀 CODA EXPRESS - Ayuda rápida\n\n1. 📍 Busca la ubicación\n2. 📝 Completa los datos\n3. 🚗 Calcula costo\n4. 📱 Envía WhatsApp');
   }
   
   function loadGoogleMaps() {
@@ -686,6 +679,7 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
     e.preventDefault();
     deferredPrompt = e;
     installBtn.classList.add('show');
+    console.log('📱 Instalación disponible');
   });
   
   installBtn.addEventListener('click', async () => {
@@ -700,56 +694,16 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
     }
   });
   
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    console.log('App instalada ejecutándose');
+  }
+  
   if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.navigator.standalone) {
     setTimeout(() => {
       showToast('📱 En iOS: Compartir → "Agregar a pantalla de inicio"', 'info');
     }, 2000);
   }
 })();
-
-// Service Worker
-if ('serviceWorker' in navigator) {
-  const swCode = `const CACHE_NAME = 'coda-v1';
-self.addEventListener('install', event => {
-  event.waitUntil(self.skipWaiting());
-});
-self.addEventListener('activate', event => {
-  event.waitUntil(self.clients.claim());
-});
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
-  );
-});`;
-  const blob = new Blob([swCode], { type: 'application/javascript' });
-  const swUrl = URL.createObjectURL(blob);
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register(swUrl).then(reg => {
-      console.log('✅ Service Worker registrado');
-    }).catch(err => {
-      console.error('❌ Error SW:', err);
-    });
-  });
-}
-
-// Manifest
-const manifestData = {
-  short_name: "CodaExpress",
-  name: "Coda Express",
-  icons: [
-    { src: "/Gabriel_CodaExpress/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
-    { src: "/Gabriel_CodaExpress/android-chrome-512x512.png", sizes: "512x512", type: "image/png" }
-  ],
-  start_url: "/Gabriel_CodaExpress/",
-  display: "standalone",
-  theme_color: "#DE440D",
-  background_color: "#ffffff"
-};
-const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: "application/json" });
-const manifestLink = document.createElement('link');
-manifestLink.rel = 'manifest';
-manifestLink.href = URL.createObjectURL(manifestBlob);
-document.head.appendChild(manifestLink);
 </script>
 </body>
 </html>
