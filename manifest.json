@@ -1,7 +1,7 @@
 {
-  "short_name": "MiApp",
-  "name": "Mi Progressive Web App",
-  "description": "Una PWA completa con Service Worker",
+  "short_name": "Coda EXpress",
+  "name": "Coda EXpress",
+  "description": "Una app para calcular precio segun la distancia",
   "icons": [
     {
       "src": "/Gabriel_CodaExpress/android-chrome-192x192.png",
