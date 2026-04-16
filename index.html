@@ -67,8 +67,15 @@
     .logo-img {
       width: 50px;
       height: 50px;
+      background: linear-gradient(135deg, var(--coda), #ff6b35);
       border-radius: 16px;
-      object-fit: contain;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: bold;
+      color: white;
+      box-shadow: 0 4px 12px rgba(222, 68, 13, 0.3);
     }
     
     h1 {
@@ -90,6 +97,7 @@
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
       font-size: 16px;
+      width: 100%;
     }
     
     .btn-primary:hover {
@@ -137,6 +145,11 @@
       border: 1px solid var(--border);
     }
     
+    .card h3 {
+      margin-bottom: 15px;
+      color: var(--text-primary);
+    }
+    
     input, textarea, select {
       width: 100%;
       padding: 14px 16px;
@@ -149,7 +162,7 @@
       margin-bottom: 12px;
     }
     
-    input:focus, textarea:focus {
+    input:focus, textarea:focus, select:focus {
       outline: none;
       border-color: var(--coda);
       box-shadow: 0 0 0 3px rgba(222, 68, 13, 0.1);
@@ -161,7 +174,7 @@
       overflow: hidden;
       margin-top: 15px;
       border: 1px solid var(--border);
-      background: #f0f0f0;
+      background: #e2e8f0;
     }
     
     .result-card {
@@ -228,6 +241,7 @@
       border-radius: 20px;
       font-size: 12px;
       margin: 4px;
+      color: var(--text-primary);
     }
     
     .footer {
@@ -239,7 +253,6 @@
       color: #94a3b8;
     }
     
-    /* Pantalla de carga SPLASH - Fondo BLANCO */
     .splash {
       position: fixed;
       inset: 0;
@@ -260,17 +273,16 @@
     .splash-logo {
       width: 100px;
       height: 100px;
-      border-radius: 24px;
+      background: linear-gradient(135deg, #DE440D, #ff6b35);
+      border-radius: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 52px;
+      font-weight: bold;
+      color: white;
       margin-bottom: 20px;
-    }
-    
-    .splash-logo img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+      box-shadow: 0 10px 30px rgba(222, 68, 13, 0.3);
     }
     
     .splash h1 {
@@ -279,26 +291,33 @@
     }
     
     .splash p {
-      color: #64748b;
+      color: #DE440D;
       margin-top: 8px;
+    }
+    
+    .loading-map {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #DE440D;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
 
-<!-- Pantalla de carga SPLASH - Fondo BLANCO con tu logo -->
+<!-- Pantalla de carga SPLASH -->
 <div class="splash" id="splash">
-  <div class="splash-logo">
-    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23DE440D'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white'%3EC%3C/text%3E%3C/svg%3E" alt="Logo">
-  </div>
+  <div class="splash-logo">C</div>
   <h1 style="color: #DE440D;">Coda Express</h1>
   <p>Calcula el costo de tus entregas</p>
 </div>
 
-<div class="container" id="app">
+<div class="container">
   <div class="header">
     <div class="logo-area">
-      <img class="logo-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23DE440D'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white'%3EC%3C/text%3E%3C/svg%3E" alt="Coda Express">
+      <div class="logo-img">C</div>
       <h1>Coda Express</h1>
     </div>
     <div style="display: flex; gap: 10px;">
@@ -308,18 +327,22 @@
   </div>
   
   <div class="grid">
+    <!-- Columna izquierda - Mapa -->
     <div class="card">
-      <h3 style="margin-bottom: 15px;">📍 Ubicación del cliente</h3>
+      <h3>📍 Ubicación del cliente</h3>
       <input type="text" id="locationInput" placeholder="Pega un link de Google Maps o escribe una dirección">
-      <button class="btn-primary" id="searchBtn" style="width: 100%;">Buscar ubicación</button>
-      <div id="map" class="map-container"></div>
+      <button class="btn-primary" id="searchBtn">Buscar ubicación</button>
+      <div id="map" class="map-container">
+        <div class="loading-map">🔄 Cargando mapa...</div>
+      </div>
       <p style="font-size: 12px; margin-top: 10px; color: #94a3b8;">
         💡 Haz clic en el mapa para marcar la ubicación manualmente
       </p>
     </div>
     
+    <!-- Columna derecha - Datos -->
     <div class="card">
-      <h3 style="margin-bottom: 15px;">📋 Datos del cliente</h3>
+      <h3>📋 Datos del cliente</h3>
       <input type="text" id="nombreInput" placeholder="Nombre completo">
       <input type="tel" id="telefonoInput" placeholder="Teléfono">
       <textarea id="direccionInput" rows="2" placeholder="Dirección detallada"></textarea>
@@ -333,7 +356,7 @@
         <option value="Tarde">🌇 Tarde</option>
       </select>
       
-      <button class="btn-primary" id="calcularBtn" style="width: 100%; margin-top: 10px;">
+      <button class="btn-primary" id="calcularBtn" style="margin-top: 10px;">
         🚗 Calcular costo de entrega
       </button>
       
@@ -353,7 +376,7 @@
 <div id="toast" class="toast"></div>
 
 <script>
-// ========== CODA EXPRESS ==========
+// ========== CODA EXPRESS - API KEY CORRECTA ==========
 const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
 
 (function() {
@@ -375,6 +398,7 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
   let clientePoint = null;
   let isDarkMode = localStorage.getItem('darkMode') === 'true';
   
+  // La Cremita - Santo Domingo
   const RESTAURANTE = { lat: -0.245197, lng: -79.158230 };
   
   function showToast(message, type = 'info') {
@@ -387,60 +411,72 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
     }, 3000);
   }
   
-  function initMap() {
-    if (!window.google || !window.google.maps) {
-      console.error('Google Maps no cargado');
-      showToast('Error cargando Google Maps', 'error');
-      return;
+  // Inicializar mapa
+  window.initMap = function() {
+    try {
+      const mapContainer = document.getElementById('map');
+      mapContainer.innerHTML = '';
+      
+      const mapStyles = isDarkMode ? [
+        { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+        { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+        { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] }
+      ] : [];
+      
+      map = new google.maps.Map(mapContainer, {
+        center: RESTAURANTE,
+        zoom: 14,
+        styles: mapStyles,
+        zoomControl: true,
+        fullscreenControl: true
+      });
+      
+      // Marcador del restaurante (rojo)
+      new google.maps.Marker({
+        position: RESTAURANTE,
+        map: map,
+        title: 'La Cremita',
+        icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+      });
+      
+      // Marcador del cliente (verde, movible)
+      marker = new google.maps.Marker({
+        position: RESTAURANTE,
+        map: map,
+        title: 'Cliente',
+        icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+        draggable: true
+      });
+      
+      marker.addListener('dragend', () => {
+        const pos = marker.getPosition();
+        clientePoint = { lat: pos.lat(), lng: pos.lng() };
+        reverseGeocode(clientePoint);
+        showToast('📍 Ubicación actualizada', 'success');
+      });
+      
+      map.addListener('click', (e) => {
+        const pos = e.latLng;
+        clientePoint = { lat: pos.lat(), lng: pos.lng() };
+        marker.setPosition(pos);
+        reverseGeocode(clientePoint);
+        showToast('📍 Ubicación marcada', 'success');
+      });
+      
+      showToast('✅ Mapa cargado correctamente', 'success');
+    } catch (error) {
+      console.error('Error en mapa:', error);
+      document.getElementById('map').innerHTML = '<div class="loading-map">❌ Error al cargar el mapa</div>';
+      showToast('Error al cargar el mapa', 'error');
     }
-    
-    const mapStyles = isDarkMode ? [
-      { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-      { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-      { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
-      { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] }
-    ] : [];
-    
-    map = new google.maps.Map(document.getElementById('map'), {
-      center: RESTAURANTE,
-      zoom: 14,
-      styles: mapStyles,
-      zoomControl: true,
-      fullscreenControl: true
-    });
-    
-    new google.maps.Marker({
-      position: RESTAURANTE,
-      map: map,
-      title: 'La Cremita',
-      icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
-    });
-    
-    marker = new google.maps.Marker({
-      position: RESTAURANTE,
-      map: map,
-      title: 'Cliente',
-      icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
-      draggable: true
-    });
-    
-    marker.addListener('dragend', () => {
-      const pos = marker.getPosition();
-      clientePoint = { lat: pos.lat(), lng: pos.lng() };
-      reverseGeocode(clientePoint);
-      showToast('📍 Ubicación actualizada', 'success');
-    });
-    
-    map.addListener('click', (e) => {
-      const pos = e.latLng;
-      clientePoint = { lat: pos.lat(), lng: pos.lng() };
-      marker.setPosition(pos);
-      reverseGeocode(clientePoint);
-      showToast('📍 Ubicación marcada', 'success');
-    });
-    
-    showToast('✅ Mapa cargado correctamente', 'success');
-  }
+  };
+  
+  // Error de autenticación de Google Maps
+  window.gm_authFailure = function() {
+    showToast('❌ Error de API Key. Verifica que las APIs estén activadas en Google Cloud Console', 'error');
+    document.getElementById('map').innerHTML = '<div class="loading-map">❌ Error de autenticación. Revisa tu API Key</div>';
+  };
   
   function reverseGeocode(point) {
     const geocoder = new google.maps.Geocoder();
@@ -452,6 +488,11 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
   }
   
   function buscarDireccion() {
+    if (!window.google || !window.google.maps) {
+      showToast('Google Maps aún no está listo', 'error');
+      return;
+    }
+    
     const query = locationInput.value.trim();
     if (!query) {
       showToast('🔍 Ingresa una dirección o link', 'info');
@@ -460,6 +501,7 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
     
     showToast('🔍 Buscando ubicación...', 'info');
     
+    // Extraer coordenadas de link de Google Maps
     const latMatch = query.match(/@([-\d.]+),([-\d.]+)/);
     if (latMatch) {
       const lat = parseFloat(latMatch[1]);
@@ -503,6 +545,7 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
       return;
     }
     
+    // Cálculo de distancia usando fórmula de Haversine
     const R = 6371;
     const dLat = (clientePoint.lat - RESTAURANTE.lat) * Math.PI / 180;
     const dLng = (clientePoint.lng - RESTAURANTE.lng) * Math.PI / 180;
@@ -512,6 +555,7 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     const distanciaKm = R * c;
     
+    // Cálculo de costo
     let costo;
     if (distanciaKm <= 1.5) {
       costo = 2.00;
@@ -569,6 +613,7 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
       }
     }, 100);
     
+    // Guardar en historial local
     const historial = JSON.parse(localStorage.getItem('coda_historial') || '[]');
     historial.unshift({ ...resultadoData, fecha: new Date().toISOString() });
     if (historial.length > 20) historial.pop();
@@ -585,6 +630,7 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
       document.body.classList.remove('dark');
       darkModeBtn.textContent = '🌙';
     }
+    // Recargar mapa con nuevo estilo
     if (map && window.google) {
       const newStyles = isDarkMode ? [
         { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
@@ -606,17 +652,20 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
       '📲 Instala la app para usarla sin internet');
   }
   
+  // Cargar Google Maps
   function loadGoogleMaps() {
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initMapCallback&libraries=geometry,places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initMap&libraries=geometry,places`;
     script.async = true;
     script.defer = true;
-    window.initMapCallback = () => {
-      initMap();
+    script.onerror = function() {
+      showToast('❌ Error al cargar Google Maps. Revisa tu conexión', 'error');
+      document.getElementById('map').innerHTML = '<div class="loading-map">❌ Error de conexión</div>';
     };
     document.head.appendChild(script);
   }
   
+  // Eventos
   searchBtn.onclick = buscarDireccion;
   calcularBtn.onclick = calcularDistanciaYCosto;
   darkModeBtn.onclick = toggleDarkMode;
@@ -626,11 +675,13 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
     if (e.key === 'Enter') buscarDireccion();
   });
   
+  // Aplicar dark mode guardado
   if (isDarkMode) {
     document.body.classList.add('dark');
     darkModeBtn.textContent = '☀️';
   }
   
+  // Ocultar splash después de 1.5 segundos
   setTimeout(() => {
     splash.classList.add('hide');
     setTimeout(() => {
@@ -638,6 +689,7 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
     }, 500);
   }, 1500);
   
+  // Cargar datos guardados del cliente
   const savedNombre = localStorage.getItem('coda_nombre');
   const savedTelefono = localStorage.getItem('coda_telefono');
   if (savedNombre) nombreInput.value = savedNombre;
@@ -646,8 +698,10 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
   nombreInput.addEventListener('change', () => localStorage.setItem('coda_nombre', nombreInput.value));
   telefonoInput.addEventListener('change', () => localStorage.setItem('coda_telefono', telefonoInput.value));
   
+  // Iniciar carga del mapa
   loadGoogleMaps();
   
+  // PWA Instalación
   let deferredPrompt;
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
@@ -667,6 +721,7 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
     }
   });
   
+  // iOS
   if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.navigator.standalone) {
     setTimeout(() => {
       showToast('📱 En iOS: Compartir → "Agregar a pantalla de inicio"', 'info');
@@ -674,7 +729,7 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo";
   }
 })();
 
-// Service Worker
+// ========== SERVICE WORKER EMBEBIDO ==========
 if ('serviceWorker' in navigator) {
   const swCode = `const CACHE_NAME = 'coda-express-v1';
 const urlsToCache = ['/', '/index.html'];
@@ -709,7 +764,7 @@ self.addEventListener('fetch', event => {
   });
 }
 
-// Manifest
+// ========== MANIFEST DINÁMICO ==========
 const manifestData = {
   short_name: "CodaExpress",
   name: "Coda Express - Entregas",
